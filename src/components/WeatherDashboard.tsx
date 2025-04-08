@@ -1,35 +1,21 @@
 
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchCurrentWeather, fetchWeatherForecast } from "@/services/WeatherService";
+import { fetchWeatherForecast } from "@/services/WeatherService";
 import SearchBar from "@/components/SearchBar";
-import CurrentWeather from "@/components/CurrentWeather";
-import ForecastChart from "@/components/ForecastChart";
-import WeatherMetrics from "@/components/WeatherMetrics";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CloudRain } from "lucide-react";
+import SimpleTemperatureGraph from "@/components/SimpleTemperatureGraph";
 
 const WeatherDashboard: React.FC = () => {
   const [city, setCity] = useState("London");
   
   const { 
-    data: currentWeather, 
-    isLoading: isLoadingCurrent,
-    isError: isErrorCurrent,
-    refetch: refetchCurrent
-  } = useQuery({
-    queryKey: ["currentWeather", city],
-    queryFn: () => fetchCurrentWeather(city),
-    enabled: city !== "",
-  });
-  
-  const { 
     data: forecast, 
-    isLoading: isLoadingForecast,
-    isError: isErrorForecast,
-    refetch: refetchForecast
+    isLoading,
+    isError,
+    refetch
   } = useQuery({
     queryKey: ["forecast", city],
     queryFn: () => fetchWeatherForecast(city),
@@ -38,19 +24,15 @@ const WeatherDashboard: React.FC = () => {
   
   const handleSearch = (searchCity: string) => {
     setCity(searchCity);
-    refetchCurrent();
-    refetchForecast();
+    refetch();
   };
   
-  const isLoading = isLoadingCurrent || isLoadingForecast;
-  const isError = isErrorCurrent || isErrorForecast;
-  
   return (
-    <div className="container mx-auto py-6 px-4 space-y-6 max-w-7xl">
+    <div className="container mx-auto py-6 px-4 space-y-6 max-w-5xl">
       <div className="flex flex-col items-center space-y-4">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <CloudRain className="h-8 w-8 text-primary" />
-          <span>Weather Visualization</span>
+          <span>Weather Temperature</span>
         </h1>
         <SearchBar onSearch={handleSearch} isLoading={isLoading} />
       </div>
@@ -62,30 +44,19 @@ const WeatherDashboard: React.FC = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-6">
           {isLoading ? (
-            <>
-              <Skeleton className="w-full h-40 rounded-lg" />
-              <Skeleton className="w-full h-[300px] rounded-lg" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Skeleton className="w-full h-[200px] rounded-lg" />
-                <Skeleton className="w-full h-[200px] rounded-lg" />
-                <Skeleton className="w-full h-[200px] rounded-lg" />
-              </div>
-            </>
+            <Skeleton className="w-full h-[300px] rounded-lg" />
           ) : (
-            currentWeather && forecast && (
-              <>
-                <CurrentWeather data={currentWeather} />
-                
-                <ForecastChart data={forecast.list.slice(0, 40)} />
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <WeatherMetrics data={forecast.list.slice(0, 40)} metricType="humidity" />
-                  <WeatherMetrics data={forecast.list.slice(0, 40)} metricType="wind" />
-                  <WeatherMetrics data={forecast.list.slice(0, 40)} metricType="pressure" />
-                </div>
-              </>
+            forecast && (
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle>Temperature for {forecast.city}, {forecast.country}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <SimpleTemperatureGraph data={forecast.list.slice(0, 24)} />
+                </CardContent>
+              </Card>
             )
           )}
         </div>
