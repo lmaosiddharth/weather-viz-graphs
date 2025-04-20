@@ -1,91 +1,84 @@
 
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Menu, X, CloudSun } from "lucide-react";
-import { fetchWeatherForecast } from "../services/WeatherService";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { Search, Heart, ShoppingCart, User, CloudSun } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchWeatherForecast } from "../services/WeatherService";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [city, setCity] = useState("New York");
-  const location = useLocation();
+  const [city] = useState("New York");
   
   const { data: weather } = useQuery({
     queryKey: ["currentWeather", city],
     queryFn: () => fetchWeatherForecast(city),
     select: (data) => data?.list?.[0] || null,
-    staleTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
   });
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   return (
-    <header className="sticky top-0 bg-white border-b border-blue-100 z-50">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
+    <div className="sticky top-0 z-50 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between py-4">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-blue-600">
-            ShoeCraft
+          <Link to="/" className="flex items-center">
+            <img src="/lovable-uploads/a4e85645-1862-4c44-91a7-3d8ce0ba3490.png" alt="BlueSole Logo" className="h-12" />
+            <span className="text-2xl font-bold text-blue-900 ml-2">BlueSole</span>
           </Link>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link to="/" className={`font-medium ${location.pathname === '/' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>
-              Home
-            </Link>
-            <Link to="/shop" className={`font-medium ${location.pathname === '/shop' ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}>
-              Shop
-            </Link>
-            <Link to="/cart" className="relative font-medium text-gray-700 hover:text-blue-600">
-              <ShoppingBag className="h-5 w-5" />
-              <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                0
-              </span>
-            </Link>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-xl mx-8">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search for anything"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+              />
+              <Search className="absolute right-3 top-2.5 text-gray-400 h-5 w-5" />
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex items-center gap-6">
+            <Link to="/brands" className="text-gray-700 hover:text-blue-600">Brands</Link>
+            <Link to="/plans" className="text-gray-700 hover:text-blue-600">Plans & Pricing</Link>
+            <Link to="/faqs" className="text-gray-700 hover:text-blue-600">FAQs</Link>
+            <Link to="/contact" className="text-gray-700 hover:text-blue-600">Contact US</Link>
           </nav>
-          
-          {/* Weather Widget */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center mr-2">
+
+          {/* Right Section */}
+          <div className="flex items-center gap-4 ml-6">
+            <button className="px-4 py-2 text-gray-700 hover:text-blue-600 border border-gray-300 rounded">
+              Log in
+            </button>
+            <button className="px-4 py-2 bg-blue-900 text-white rounded hover:bg-blue-800">
+              Sign up
+            </button>
+            <Heart className="h-6 w-6 text-gray-700 hover:text-blue-600 cursor-pointer" />
+            <ShoppingCart className="h-6 w-6 text-gray-700 hover:text-blue-600 cursor-pointer" />
+            <User className="h-6 w-6 text-gray-700 hover:text-blue-600 cursor-pointer" />
+            <div className="flex items-center gap-1">
               <CloudSun className="h-5 w-5 text-blue-500" />
               {weather && (
-                <span className="ml-1 text-sm font-medium">
+                <span className="text-sm font-medium text-gray-700">
                   {Math.round(weather.temp)}°C
                 </span>
               )}
             </div>
-            
-            {/* Mobile Menu Button */}
-            <button className="md:hidden" onClick={toggleMenu}>
-              {isMenuOpen ? (
-                <X className="h-6 w-6 text-blue-600" />
-              ) : (
-                <Menu className="h-6 w-6 text-blue-600" />
-              )}
-            </button>
           </div>
         </div>
-        
-        {/* Mobile Menu */}
-        {isMenuOpen && (
-          <nav className="md:hidden pt-4 pb-2">
-            <div className="flex flex-col space-y-4">
-              <Link to="/" className="font-medium text-gray-700 hover:text-blue-600" onClick={toggleMenu}>
-                Home
-              </Link>
-              <Link to="/shop" className="font-medium text-gray-700 hover:text-blue-600" onClick={toggleMenu}>
-                Shop
-              </Link>
-              <Link to="/cart" className="font-medium text-gray-700 hover:text-blue-600 flex items-center" onClick={toggleMenu}>
-                <ShoppingBag className="h-5 w-5 mr-2" />
-                Cart (0)
-              </Link>
-            </div>
-          </nav>
-        )}
       </div>
-    </header>
+
+      {/* Announcement Bar */}
+      <div className="bg-blue-900 text-white py-2 overflow-hidden">
+        <div className="whitespace-nowrap animate-scroll">
+          <span className="inline-block">BEST SALES ON THE ENTIRE COLLECTION</span>
+          <span className="inline-block mx-8">BlueSole</span>
+          <span className="inline-block">BEST SALES ON THE ENTIRE COLLECTION</span>
+          <span className="inline-block mx-8">BlueSole</span>
+        </div>
+      </div>
+    </div>
   );
 };
 
