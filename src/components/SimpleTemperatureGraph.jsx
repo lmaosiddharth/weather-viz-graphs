@@ -14,7 +14,6 @@ const SimpleTemperatureGraph = ({ data }) => {
   const chartData = data.map((item) => ({
     time: formatTime(item.dt),
     temperature: Math.round(item.temp),
-    timestamp: item.dt,
   }));
 
   return (
