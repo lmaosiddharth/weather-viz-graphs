@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWeatherForecast } from "../services/WeatherService";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -41,6 +41,7 @@ const SearchBar = ({ onSearch, isLoading }) => {
 
 const WeatherDashboard = () => {
   const [city, setCity] = useState("London");
+  const [weatherData, setWeatherData] = useState(null);
   
   const { 
     data: forecast, 
@@ -55,12 +56,17 @@ const WeatherDashboard = () => {
     retry: false,
     onSuccess: (data) => {
       console.log("Forecast data fetched successfully:", data);
+      setWeatherData(data);
     },
     onError: (err) => {
       console.error("Error fetching forecast:", err);
       toast.error(`Failed to fetch weather: ${err.message}`);
     }
   });
+  
+  useEffect(() => {
+    console.log("WeatherDashboard rendered with forecast data:", forecast);
+  }, [forecast]);
   
   const handleSearch = (searchCity) => {
     setCity(searchCity);

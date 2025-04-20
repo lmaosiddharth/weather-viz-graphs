@@ -9,20 +9,28 @@ export const fetchWeatherForecast = async (city) => {
     );
     
     if (!response.ok) {
-      throw new Error("Failed to fetch weather data");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch weather data");
     }
     
     const data = await response.json();
     
+    if (!data.list || !Array.isArray(data.list) || data.list.length === 0) {
+      console.error("Invalid API response format:", data);
+      throw new Error("Invalid data from weather API");
+    }
+    
+    console.log("Raw API response:", data);
+    
     return {
-      city: data.city.name,
-      country: data.city.country,
+      city: data.city?.name || city,
+      country: data.city?.country || "",
       list: data.list.map((item) => ({
         dt: item.dt,
         temp: item.main.temp,
         humidity: item.main.humidity,
-        description: item.weather[0].description,
-        icon: item.weather[0].icon,
+        description: item.weather[0]?.description || "",
+        icon: item.weather[0]?.icon || "",
       }))
     };
   } catch (error) {
