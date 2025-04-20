@@ -11,6 +11,13 @@ const formatTime = (timestamp) => {
 };
 
 const SimpleTemperatureGraph = ({ data }) => {
+  // Check if data exists and has items
+  if (!data || !data.length) {
+    return <div className="h-[300px] w-full flex items-center justify-center bg-gray-100 rounded-lg">No data available</div>;
+  }
+
+  console.log("Graph data:", data); // Add logging to debug
+
   const chartData = data.map((item) => ({
     time: formatTime(item.dt),
     temperature: Math.round(item.temp),

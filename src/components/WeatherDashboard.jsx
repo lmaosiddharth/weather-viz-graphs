@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
 import { CloudRain } from "lucide-react";
 import SimpleTemperatureGraph from "./SimpleTemperatureGraph";
+import { toast } from "sonner";
 
 const SearchBar = ({ onSearch, isLoading }) => {
   const [city, setCity] = useState("");
@@ -45,17 +46,28 @@ const WeatherDashboard = () => {
     data: forecast, 
     isLoading,
     isError,
+    error,
     refetch
   } = useQuery({
     queryKey: ["forecast", city],
     queryFn: () => fetchWeatherForecast(city),
     enabled: city !== "",
+    retry: false,
+    onSuccess: (data) => {
+      console.log("Forecast data fetched successfully:", data);
+    },
+    onError: (err) => {
+      console.error("Error fetching forecast:", err);
+      toast.error(`Failed to fetch weather: ${err.message}`);
+    }
   });
   
   const handleSearch = (searchCity) => {
     setCity(searchCity);
     refetch();
   };
+
+  console.log("Current forecast state:", { forecast, isLoading, isError });
   
   return (
     <div className="container mx-auto py-6 px-4 space-y-6 max-w-5xl">
@@ -76,19 +88,28 @@ const WeatherDashboard = () => {
       ) : (
         <div className="space-y-6">
           {isLoading ? (
-            <div className="w-full h-[300px] bg-gray-200 rounded-lg animate-pulse" />
-          ) : (
-            forecast && (
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle>Temperature for {forecast.city}, {forecast.country}</CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card>
+              <CardHeader>
+                <CardTitle>Loading weather data...</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-[300px] bg-gray-100 rounded-lg animate-pulse" />
+              </CardContent>
+            </Card>
+          ) : forecast ? (
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle>Temperature for {forecast.city}, {forecast.country}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {forecast.list && forecast.list.length > 0 ? (
                   <SimpleTemperatureGraph data={forecast.list.slice(0, 24)} />
-                </CardContent>
-              </Card>
-            )
-          )}
+                ) : (
+                  <p className="text-center py-8">No temperature data available</p>
+                )}
+              </CardContent>
+            </Card>
+          ) : null}
         </div>
       )}
     </div>
